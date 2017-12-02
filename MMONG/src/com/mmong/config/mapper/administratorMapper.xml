@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mmong.config.mapper.administratorMapper">
+
+	<resultMap type="administrator" id="administrator-resultmap">
+		<id column="admin_id" property="adminId"/>
+		<result column="admin_name" property="adminName"/>
+		<result column="admin_phone" property="adminPhone"/>
+		<result column="admin_email" property="adminEmail"/>
+	</resultMap>
+
+
+	<sql id="select-sql-administrator">
+		SELECT admin_id adminId, 
+					  admin_name adminName, 					  
+					  admin_phone adminPhone, 					  
+					  admin_email adminEmail
+		FROM administrator
+	</sql>
+
+	<insert id="insertAdministrator" parameterType="administrator">
+		INSERT INTO administrator 
+		VALUES (#{adminId},
+						#{adminName},
+						#{adminPhone},
+						#{adminEmail}
+						)
+	</insert>
+
+	<update id="updateAdministrator" parameterType="administrator">
+		UPDATE administrator
+		SET  admin_name=#{adminName},
+				admin_phone=#{adminPhone},
+				admin_email=#{adminEmail}
+		WHERE admin_id=#{adminId}
+	</update>
+
+ <!-- 
+ 조인 - administrator가 user의 패스워드를 불러 올수 있어야함
+ -->
+	<resultMap id="administrator-users-resultMap" type="administrator" extends="administrator-resultmap">
+		<association property="user" javaType="User">
+			<result property="userId" column="user_id"/>
+			<result property="userPwd" column="user_pwd"/>
+			<result property="userAuthority" column="user_authority"/>
+			<result property="userEnable" column="user_enable"/>
+		</association>
+	</resultMap>
+ 
+	<select id="searchAdministratorById" parameterType="string" resultMap="administrator-users-resultMap">
+		SELECT a.admin_id, a.admin_name, a.admin_phone, a.admin_email,
+					  u.user_id, u.user_pwd, u.user_authority, u.user_enable
+		FROM 	  administrator a, users u
+		WHERE admin_id=user_id(+)
+		AND	  admin_id=#{value}
+	</select> 
+
+
+	<!-- ============수정===================== -->
+	
+ 	
+ 	<!-- 관리자 핸드폰번호 중복조회 -->
+	<select id="checkAdminPhone" parameterType="String" resultType="int">
+		SELECT count(*)
+		FROM administrator
+		WHERE admin_phone = #{value}
+	</select>	
+ 	
+ 	<!-- 관리자 이메일 중복조회 -->
+	<select id="checkAdminEmail" parameterType="String" resultType="int">
+		SELECT count(*)
+		FROM administrator
+		WHERE admin_email = #{value}
+	</select>	
+ 	
+ </mapper>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
